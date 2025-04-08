@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Response Generator</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>Email Response Generator</h1>
+    <form method="POST">
+      <label for="email_text">Paste Customer Email:</label>
+      <textarea name="email_text" id="email_text" rows="8" required>{{ user_input }}</textarea>
+
+      <button type="submit">Generate Draft</button>
+    </form>
+
+    {% if email_draft %}
+      <h2>Generated Draft:</h2>
+      <textarea rows="10" readonly title="Generated email draft" placeholder="Generated email draft will appear here">{{ email_draft }}</textarea>
+    {% endif %}
+  </div>
+</body>
+</html>
