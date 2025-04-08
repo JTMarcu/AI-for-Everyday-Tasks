@@ -1,28 +1,43 @@
 from flask import Flask, render_template, request
-from transformers import pipeline
 from dotenv import load_dotenv
+import requests
 import os
 
 # Load environment variables
 load_dotenv()
-# GPT-2 doesn't need a token, so we leave it out or use it only if needed for private models
-# hugging_face_api_key = os.getenv("HUGGING_FACE_API_KEY")
+HUGGINGFACE_API_KEY = os.getenv("HUGGING_FACE_API_KEY")
 
 app = Flask(__name__)
 
-# Load the Hugging Face text generation pipeline
-email_generator = pipeline("text-generation", model="gpt2", use_auth_token=None)
+# Hugging Face Inference API URL and headers
+API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.1"
+headers = {
+    "Authorization": f"Bearer {HUGGINGFACE_API_KEY}"
+}
+
+def query_huggingface(prompt):
+    payload = {
+        "inputs": prompt,
+        "parameters": {
+            "max_new_tokens": 300,
+            "temperature": 0.7,
+            "return_full_text": False
+        }
+    }
+    response = requests.post(API_URL, headers=headers, json=payload)
+    response.raise_for_status()  # Raise an error for bad responses
+    return response.json()
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-    email_draft = ""
     user_input = ""
+    email_draft = ""
     if request.method == "POST":
         user_input = request.form["email_text"]
-        prompt = f"Write a professional and polite email reply to the following:\n\n{user_input.strip()}\n\nResponse:"
+        prompt = f"<s>[INST] Write a professional and polite email reply to the following:\n{user_input.strip()} [/INST]"
         try:
-            response = email_generator(prompt, max_length=250, do_sample=True, temperature=0.7)
-            email_draft = response[0]["generated_text"].replace(prompt, "").strip()
+            result = query_huggingface(prompt)
+            email_draft = result[0]["generated_text"] if isinstance(result, list) else str(result)
         except Exception as e:
             email_draft = f"Error: {e}"
     return render_template("index.html", user_input=user_input, email_draft=email_draft)
