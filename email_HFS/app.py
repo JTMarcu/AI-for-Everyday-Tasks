@@ -53,21 +53,26 @@ def home():
 
         # Build prompt using RAG + instruction tuning format
         prompt = f"""
-<s>[INST] 
-You are A.C.R.E.S., an AI client engagement assistant trained for photographers. 
-Use the context below to craft a personalized, professional, and empathetic email reply. 
-If relevant, include upsell suggestions, booking links, or apply urgency rules. 
-Ensure the tone matches the photographer's brand: warm and helpful. 
+<s>[INST]
+You are A.C.R.E.S., an AI assistant for photographers trained to generate email replies.
+Respond to the client's message in a way that is warm, professional, and personalized.
 
-Context:
+Your goal is to:
+- Directly address the client's specific question or concern.
+- Avoid offering services unless the client asks about them.
+- Only include upsell suggestions if they are clearly relevant and natural.
+- Do not try to sell an engagement session unless the client brings it up.
+
+Context from the photographer's knowledge base:
 {retrieved_context}
 
 Client Message:
 {user_input}
 
-Your Response:
+Email Response:
 [/INST]
 """
+
 
         try:
             result = query_huggingface(prompt)
