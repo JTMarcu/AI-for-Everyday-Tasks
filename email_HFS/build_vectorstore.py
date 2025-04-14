@@ -4,11 +4,21 @@ from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
 
 # Load and split your knowledge base
+with open("support_knowledgebase.txt", "r", encoding="utf-8") as file:
+    text = file.read()
+
+splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+docs_split = splitter.create_documents([text])
+
+"""
+# Load and split your knowledge base
 loader = PyPDFLoader("support_knowledgebase.pdf")
 docs = loader.load()
 
 splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
 docs_split = splitter.split_documents(docs)
+
+"""
 
 # Convert to vector store
 embedding = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
